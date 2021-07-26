@@ -1,0 +1,13 @@
+<%- include('../partials/header') %>
+
+  <div class="starter-template">
+    <table class="table">
+        <% noticias.forEach(noticia => {%>
+        <tr>
+            <td><%=noticia.title%></td>
+        </tr>
+        <%})%>
+    </table>
+  </div>
+
+  <%- include('../partials/footer') %>
