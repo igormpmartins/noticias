@@ -44,7 +44,7 @@
               </li>            
             <%}%>
             <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="/login" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><%=locals.user.username%></a>
+              <a class="nav-link dropdown-toggle" href="/login" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><%=locals.user.username || locals.user.name%></a>
               <div class="dropdown-menu" aria-labelledby="dropdown01">
                 <%if (locals.user.roles.length > 1) {%>
                   <%locals.user.roles.forEach(role => {%>
