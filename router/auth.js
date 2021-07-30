@@ -2,6 +2,7 @@ const express = require('express')
 const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
 const FacebookStrategy = require('passport-facebook').Strategy
+const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy
 
 const User = require('../models/user')
 
@@ -18,6 +19,8 @@ passport.deserializeUser((user, done) => {
 })
 
 passport.use(new FacebookStrategy({
+    clientID: '',
+    clientSecret: '',
     callbackURL: 'http://localhost:3000/facebook/callback',
     profileFields: ['id', 'displayName', 'email', 'photos']
     }, async(accessToken, refreshToken, profile, done) => {
@@ -41,6 +44,33 @@ passport.use(new FacebookStrategy({
 
     })
 ) 
+
+passport.use(new GoogleStrategy({
+    clientID: '',
+    clientSecret: '',
+    callbackURL: 'http://localhost:3000/google/callback'
+    }, async(accessToken, refreshToken, profile, done) => {
+
+        const userDB = await User.findOne({googleId: profile.id})
+    
+        if (userDB) {
+            return done(null, userDB)
+        } else {
+
+            const user = new User({
+                googleId: profile.id,
+                name: profile.displayName,
+                roles: ['restrito']
+            })
+    
+            await user.save()
+
+            return done(null, user)
+        }
+
+    })
+) 
+
 
 passport.use(new LocalStrategy(async(username, password, done) => {
 
@@ -72,6 +102,8 @@ router.use((req, res, next) => {
     next()
 })
 
+//TODO: revisar logout das outras estratégias
+
 router.get('/logout', (req, res) => {
     req.session.destroy((e) => {
         res.redirect('/')
@@ -96,7 +128,10 @@ router.get('/facebook/callback',
         res.redirect('/')
     })
 
-
+router.get('/google', passport.authenticate('google', {scope: ['https://www.googleapis.com/auth/userinfo.profile']}))
+router.get('/google/callback', 
+    passport.authenticate('google', {failureRedirect: '/', successRedirect: '/'})
+    )
 
 router.get('/change-role/:role', (req, res) => {
     if (req.isAuthenticated()) {
